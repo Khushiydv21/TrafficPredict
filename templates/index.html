@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrafficPredict | Website Traffic Forecasting System</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        body {
+            background-color: #0e1117;
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        .navbar-custom {
+            background-color: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+        .card-custom {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .metric-card {
+            background: linear-gradient(145deg, #161b22, #1c2128);
+            border-left: 4px solid #1f77b4;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .nav-tabs .nav-link {
+            color: #8b949e;
+            font-weight: 500;
+            border: none;
+            padding: 12px 20px;
+        }
+        .nav-tabs .nav-link.active {
+            color: #58a6ff;
+            background-color: transparent;
+            border-bottom: 3px solid #58a6ff;
+        }
+        .badge-kpi {
+            background-color: #238636;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-3">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="fa-solid fa-chart-line text-primary me-2 fs-3"></i>
+                <div>
+                    <span class="fw-bold fs-4 text-white">TrafficPredict</span>
+                    <small class="d-block text-secondary" style="font-size: 0.75rem;">Website Traffic Forecasting Engine</small>
+                </div>
+            </a>
+            <div class="ms-auto d-flex align-items-center">
+                <span class="badge bg-secondary me-3">2,167 Records (2014-2020)</span>
+                <a href="https://github.com/Khushiydv21" target="_blank" class="btn btn-outline-light btn-sm">
+                    <i class="fa-brands fa-github me-1"></i> Khushiydv21
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container-fluid px-4 py-4">
+
+        <!-- Nav Tabs -->
+        <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button"><i class="fa-solid fa-house me-1"></i> Home Dashboard</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="predict-tab" data-bs-toggle="tab" data-bs-target="#predict" type="button"><i class="fa-solid fa-chart-area me-1"></i> Traffic Prediction</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="models-tab" data-bs-toggle="tab" data-bs-target="#models" type="button"><i class="fa-solid fa-sliders me-1"></i> Model Comparison</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button"><i class="fa-solid fa-magnifying-glass-chart me-1"></i> Data Analytics</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="about-tab" data-bs-toggle="tab" data-bs-target="#about" type="button"><i class="fa-solid fa-circle-info me-1"></i> About Project</button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="dashboardTabContent">
+
+            <!-- TAB 1: HOME DASHBOARD -->
+            <div class="tab-pane fade show active" id="home" role="tabpanel">
+                <!-- Top Metric Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-2 col-sm-6">
+                        <div class="metric-card card-custom">
+                            <small class="text-secondary">Total Page Loads</small>
+                            <h3 class="fw-bold text-white mt-1 mb-0">{{ kpis.total_loads }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <div class="metric-card card-custom">
+                            <small class="text-secondary">Daily Avg Loads</small>
+                            <h3 class="fw-bold text-white mt-1 mb-0">{{ kpis.avg_loads }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="metric-card card-custom">
+                            <small class="text-secondary">Peak Daily Traffic</small>
+                            <h3 class="fw-bold text-white mt-1 mb-0">{{ kpis.max_loads }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <div class="metric-card card-custom">
+                            <small class="text-secondary">Daily Unique Visits</small>
+                            <h3 class="fw-bold text-white mt-1 mb-0">{{ kpis.avg_unique }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="metric-card card-custom" style="border-left-color: #00E676;">
+                            <small class="text-secondary">New Visitor Ratio</small>
+                            <h3 class="fw-bold text-success mt-1 mb-0">{{ kpis.first_time_pct }}</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Charts -->
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <div class="card card-custom p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="fw-bold text-white mb-0">Historical Traffic Trend (2014 – 2020)</h5>
+                                <span class="badge bg-primary">Smoothed Moving Averages</span>
+                            </div>
+                            <div class="chart-container">
+                                {{ timeline_html | safe }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card card-custom p-3 h-100">
+                            <h5 class="fw-bold text-white mb-2">Visitor Composition</h5>
+                            <div class="chart-container">
+                                {{ donut_html | safe }}
+                            </div>
+                            <div class="p-3 mt-2 rounded bg-dark border border-secondary border-opacity-25">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>🟢 <b>First-Time:</b></span>
+                                    <span>{{ kpis.first_time_sum }} ({{ kpis.first_time_pct }})</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>🟣 <b>Returning:</b></span>
+                                    <span>{{ kpis.returning_sum }} (17.4%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: TRAFFIC PREDICTION -->
+            <div class="tab-pane fade" id="predict" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <div class="card card-custom p-3 mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="fw-bold text-white mb-0">Next 30-Day Multi-Horizon Forecast</h5>
+                                <span class="badge bg-info text-dark">Model: Linear Regression (Ridge)</span>
+                            </div>
+                            <div>{{ forecast_html | safe }}</div>
+                        </div>
+                        <div class="card card-custom p-3">
+                            <h5 class="fw-bold text-white mb-2">Synchronized Visitor Segment Projections</h5>
+                            <div>{{ visitors_html | safe }}</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card card-custom p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold text-white mb-0">Forecast Schedule</h5>
+                                <a href="/download/forecast.csv" class="btn btn-sm btn-primary">
+                                    <i class="fa-solid fa-download me-1"></i> CSV
+                                </a>
+                            </div>
+                            <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                                <table class="table table-dark table-striped table-sm text-center">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Day</th>
+                                            <th>Page Loads</th>
+                                            <th>Unique</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for r in forecast_table %}
+                                        <tr>
+                                            <td>{{ r.Date.strftime('%b %d') }}</td>
+                                            <td>{{ r.Day[:3] }}</td>
+                                            <td class="text-info fw-bold">{{ "{:,}".format(r["Page.Loads"]) }}</td>
+                                            <td>{{ "{:,}".format(r["Unique.Visits"]) }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: MODEL COMPARISON -->
+            <div class="tab-pane fade" id="models" role="tabpanel">
+                <div class="card card-custom p-4 mb-4">
+                    <h5 class="fw-bold text-white mb-3">Holdout Test Set Model Benchmark (90-Day Holdout)</h5>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover text-center align-middle">
+                            <thead>
+                                <tr class="table-secondary text-dark">
+                                    <th>Algorithm</th>
+                                    <th>Horizon</th>
+                                    <th>MAE (Loads)</th>
+                                    <th>RMSE (Loads)</th>
+                                    <th>MAPE (%)</th>
+                                    <th>Accuracy (%)</th>
+                                    <th>R² Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for m in comp_rows %}
+                                <tr>
+                                    <td class="fw-bold text-start ps-3">{{ m.model }}</td>
+                                    <td><span class="badge bg-secondary">{{ m.horizon }}</span></td>
+                                    <td>{{ m.mae }}</td>
+                                    <td>{{ m.rmse }}</td>
+                                    <td>{{ m.mape }}%</td>
+                                    <td><span class="badge {% if m.accuracy > 94 %}bg-success{% else %}bg-primary{% endif %}">{{ m.accuracy }}%</span></td>
+                                    <td>{{ m.r2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card card-custom p-3">
+                    <h5 class="fw-bold text-white mb-2">30-Day Holdout: Actual vs Predicted Validation</h5>
+                    <div>{{ val_html | safe }}</div>
+                </div>
+            </div>
+
+            <!-- TAB 4: DATA ANALYTICS -->
+            <div class="tab-pane fade" id="analytics" role="tabpanel">
+                <div class="card card-custom p-4 mb-4">
+                    <h5 class="fw-bold text-white mb-2">Weekly Seasonality Profile (Academic Demand vs Weekend Slump)</h5>
+                    <p class="text-secondary small">Tuesday is the peak traffic day (averaging ~4,955 page loads), whereas Saturday drops to ~2,501 loads (~50% decrease).</p>
+                    <div>{{ weekly_html | safe }}</div>
+                </div>
+            </div>
+
+            <!-- TAB 5: ABOUT PROJECT -->
+            <div class="tab-pane fade" id="about" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card card-custom p-4 h-100">
+                            <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-bullseye me-2"></i>Project Objectives</h5>
+                            <p>TrafficPredict is an end-to-end Machine Learning and Time Series Forecasting system designed to forecast daily website server loads across 7-, 15-, and 30-day forward horizons.</p>
+                            <h5 class="fw-bold text-primary mb-3 mt-4"><i class="fa-solid fa-database me-2"></i>Dataset Specification</h5>
+                            <ul>
+                                <li><b>Source:</b> Historical visitor traffic from <code>statforecasting.com</code></li>
+                                <li><b>Timeline:</b> 14 September 2014 to 19 August 2020 (2,167 days)</li>
+                                <li><b>Continuity:</b> 100% continuous calendar timeline (0 missing dates, 0 null values)</li>
+                                <li><b>Target:</b> <code>Page.Loads</code> with companion visitor metrics</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card card-custom p-4 h-100">
+                            <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-microchip me-2"></i>Technology Stack</h5>
+                            <ul>
+                                <li><b>Backend:</b> Python 3.14, Flask, Scikit-Learn, Statsmodels</li>
+                                <li><b>Visualizations:</b> Plotly Express & Plotly Graph Objects</li>
+                                <li><b>Deployment:</b> Vercel Serverless Python Engine (<code>@vercel/python</code>)</li>
+                                <li><b>Developer:</b> Khushi Yadav (<a href="https://github.com/Khushiydv21" target="_blank" class="text-info">@Khushiydv21</a>)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
