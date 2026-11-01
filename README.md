@@ -5,6 +5,7 @@
 [![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.3%2B-F7931E.svg)](https://scikit-learn.org/)
 [![Statsmodels](https://img.shields.io/badge/Statsmodels-0.14%2B-00599C.svg)](https://www.statsmodels.org/)
 [![Plotly](https://img.shields.io/badge/Plotly-5.18%2B-3F4F75.svg)](https://plotly.com/)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Khushiydv21/TrafficPredict)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 > **Predicting Website Traffic Using Machine Learning and Time Series Forecasting**  
